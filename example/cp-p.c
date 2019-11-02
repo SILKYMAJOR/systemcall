@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int maini(int argc, char **argv){
+int main(int argc, char **argv){
   int fd_r, fd_w;
   ssize_t n;
   int err = 0;
@@ -21,7 +21,7 @@ int maini(int argc, char **argv){
     return 1;
   }
 
-  if(fstat(fd_r, &s_buf < 0)){
+  if(fstat(fd_r, &s_buf) < 0){
     perror(argv[1]);
     return 1;
   }
