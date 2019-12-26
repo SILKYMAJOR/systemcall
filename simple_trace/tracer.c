@@ -31,7 +31,7 @@ void print_regs(){
   }
   else if(regs.orig_rax == 2){
     syscall_name = "open";
-    printf("%s (%d, %08p, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.rax);
+    printf("%s (%08p, %d, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.rax);
   }
   else if(regs.orig_rax == 3){
     syscall_name = "close";
@@ -49,6 +49,10 @@ void print_regs(){
   else if(regs.orig_rax == 12){
     syscall_name = "brk";
     printf("%s (%p) = %p\n", syscall_name, regs.rdi, regs.rax);
+  }
+  else if(regs.orig_rax == 257){
+    syscall_name = "openat";
+    printf("%s (%d, %08p, %d, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.rax);
   }
   else{
   printf("%03lld, rdi: %018p, rsi: %018p, rdx: %018p, r10: %018p, r8: %018p, r9: %018p \n",
