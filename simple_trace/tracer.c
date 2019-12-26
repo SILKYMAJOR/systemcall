@@ -9,14 +9,14 @@
 struct user_regs_struct b_regs, regs;
 
 int cmp_regs(){
-  if(regs.orig_rax != b_regs.orig_rax) return 1;
-  if(regs.rdi != b_regs.rdi) return 1;
-  if(regs.rsi != b_regs.rsi) return 1;
-  if(regs.rdx != b_regs.rdx) return 1;
-  if(regs.r10 != b_regs.r10) return 1;
-  if(regs.r8 != b_regs.r8) return 1;
-  if(regs.r9 != b_regs.r9) return 1;
-  return 0;
+  if(regs.orig_rax != b_regs.orig_rax) return 0;
+  if(regs.rdi != b_regs.rdi) return 0;
+  if(regs.rsi != b_regs.rsi) return 0;
+  if(regs.rdx != b_regs.rdx) return 0;
+  if(regs.r10 != b_regs.r10) return 0;
+  if(regs.r8 != b_regs.r8) return 0;
+  if(regs.r9 != b_regs.r9) return 0;
+  return 1;
 }
 
 void print_regs(){
