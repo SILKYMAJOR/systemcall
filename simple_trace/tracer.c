@@ -19,48 +19,92 @@ int cmp_regs(){
   return 1;
 }
 
+void print_syscall_name(char *syscall_name){
+  char *syscall_color = "\x1b[36m";
+  char *default_color = "\x1b[0m";
+  printf("%s%s%s ", syscall_color, syscall_name, default_color);
+}
+
+void print_return(int flag){
+  char *return_color = "\x1b[33m";
+  char *default_color = "\x1b[0m";
+  if(flag==0){
+    printf(" = %s%d%s\n", return_color, regs.rax, default_color);
+  }
+  else if(flag==1){
+    printf(" = %s%p%s\n", return_color, regs.rax, default_color); 
+  }
+}
+
 void print_regs(){
   char *syscall_name;
+
   if(regs.orig_rax == 0){
     syscall_name = "read";
-    printf("%s (%d, %018p, %d) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%d, %018p, %d)", regs.rdi, regs.rsi, regs.rdx);
+    print_return(0);
   }
   else if(regs.orig_rax == 1){
     syscall_name = "write";
-    printf("%s (%d, %018p, %d) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%d, %018p, %d)", regs.rdi, regs.rsi, regs.rdx);
+    print_return(0);
   }
   else if(regs.orig_rax == 2){
     syscall_name = "open";
-    printf("%s (%08p, %d, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%08p, %d, %04x)", regs.rdi, regs.rsi, regs.rdx);
+    print_return(0);
   }
   else if(regs.orig_rax == 3){
     syscall_name = "close";
-    printf("%s (%d) = %d \n", syscall_name, regs.rdi, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%d)", regs.rdi);
+    print_return(0);
+  }
+  else if(regs.orig_rax == 5){
+    syscall_name = "fstat";
+    print_syscall_name(syscall_name);
+    printf("(%d, %p)", regs.rdi, regs.rsi);
+    print_return(0);
   }
   else if(regs.orig_rax == 9){
     syscall_name = "mmap";
-    printf("%s (%p, %d, %d, %d, %d, %p) = %p\n",
-  	 syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.r8, regs.r9, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%p, %d, %d, %d, %d, %p)",
+  	 regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.r8, regs.r9);
+    print_return(1);
   }
   else if(regs.orig_rax == 10){
-    syscall_name = "mprotect";
-    printf("%s (%p, %d, %d) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.rax);
+    syscall_name = "mprotect"; 
+    print_syscall_name(syscall_name);
+    printf("(%p, %d, %d)", regs.rdi, regs.rsi, regs.rdx);
+    print_return(0);
   }
   else if(regs.orig_rax == 12){
-    syscall_name = "brk";
-    printf("%s (%p) = %p\n", syscall_name, regs.rdi, regs.rax);
+    syscall_name = "brk"; 
+    print_syscall_name(syscall_name);
+    printf("(%p)", regs.rdi);
+    print_return(1);
   }
   else if(regs.orig_rax == 21){
     syscall_name = "access";
-    printf("%s (%08p, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%08p, %04x)", regs.rdi, regs.rsi);
+    print_return(0);
   }
   else if(regs.orig_rax == 257){
     syscall_name = "openat";
-    printf("%s (%d, %08p, %d, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.rax);
+    print_syscall_name(syscall_name);
+    printf("(%d, %08p, %d, %04x)", regs.rdi, regs.rsi, regs.rdx, regs.r10);
+    print_return(0);
   }
   else{
-  printf("%03lld, rdi: %018p, rsi: %018p, rdx: %018p, r10: %018p, r8: %018p, r9: %018p \n",
+  printf("\x1b[31m");
+  printf("%03lld, rdi: %018p, rsi: %018p, rdx: %018p, r10: %018p, r8: %018p, r9: %018p",
 	 regs.orig_rax, regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.r8, regs.r9);
+  printf("\x1b[0m\n");
   }
 }
 
