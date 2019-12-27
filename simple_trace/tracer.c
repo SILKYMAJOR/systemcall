@@ -50,6 +50,10 @@ void print_regs(){
     syscall_name = "brk";
     printf("%s (%p) = %p\n", syscall_name, regs.rdi, regs.rax);
   }
+  else if(regs.orig_rax == 21){
+    syscall_name = "access";
+    printf("%s (%08p, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rax);
+  }
   else if(regs.orig_rax == 257){
     syscall_name = "openat";
     printf("%s (%d, %08p, %d, %04x) = %d\n", syscall_name, regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.rax);
