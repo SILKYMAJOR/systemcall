@@ -5,8 +5,10 @@
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/wait.h>
+#include <sys/uio.h>
 
 struct user_regs_struct b_regs, regs;
+int pid;
 
 int cmp_regs(){
   if(regs.orig_rax != b_regs.orig_rax) return 0;
@@ -17,6 +19,20 @@ int cmp_regs(){
   if(regs.r8 != b_regs.r8) return 0;
   if(regs.r9 != b_regs.r9) return 0;
   return 1;
+}
+
+void transfer_argument_data(unsigned long dst_addr, int size, char **buf){
+  struct iovec srcbuf, dstbuf;
+  ssize_t r;
+
+  srcbuf.iov_base = buf;
+  srcbuf.iov_len = size;
+
+  dstbuf.iov_base = (void *) dst_addr;
+  dstbuf.iov_len = size;
+  
+  r = process_vm_readv(pid, &srcbuf, 1, &dstbuf, 1, 0);
+  
 }
 
 void print_syscall_name(char *syscall_name){
@@ -42,14 +58,22 @@ void print_regs(){
   if(regs.orig_rax == 0){
     syscall_name = "read";
     print_syscall_name(syscall_name);
-    printf("(%d, %018p, %d)", regs.rdi, regs.rsi, regs.rdx);
+
+    char *buf[regs.rdx]; 
+    transfer_argument_data(regs.rsi, regs.rdx, buf);
+    printf("(%d, \x1b[34m%s\x1b[0m, %d)", regs.rdi, buf, regs.rdx);
+
     print_return(0);
   }
   else if(regs.orig_rax == 1){
     syscall_name = "write";
     print_syscall_name(syscall_name);
-    printf("(%d, %018p, %d)", regs.rdi, regs.rsi, regs.rdx);
+
+    char *buf[regs.rdx]; 
+    transfer_argument_data(regs.rsi, regs.rdx, buf);
+    printf("(%d, \x1b[31m%s\x1b[0m, %d)", regs.rdi, buf, regs.rdx);
     print_return(0);
+
   }
   else if(regs.orig_rax == 2){
     syscall_name = "open";
@@ -97,11 +121,15 @@ void print_regs(){
   else if(regs.orig_rax == 257){
     syscall_name = "openat";
     print_syscall_name(syscall_name);
-    printf("(%d, %08p, %d, %04x)", regs.rdi, regs.rsi, regs.rdx, regs.r10);
+    
+    char *buf[regs.rdx]; 
+    transfer_argument_data(regs.rsi, regs.rdx, buf);
+    printf("(%d, \x1b[34m%s\x1b[0m, %d, %04x)", regs.rdi, buf, regs.rdx, regs.r10);
+    
     print_return(0);
   }
   else{
-  printf("\x1b[31m");
+  printf("\x1b[32m");
   printf("%03lld, rdi: %018p, rsi: %018p, rdx: %018p, r10: %018p, r8: %018p, r9: %018p",
 	 regs.orig_rax, regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.r8, regs.r9);
   printf("\x1b[0m\n");
@@ -109,7 +137,7 @@ void print_regs(){
 }
 
 int main(int argc, char *argv[], char *envp[]){
-  int pid, status, count = 0;
+  int status, count = 0;
   pid = fork();
 
   if(!pid){
